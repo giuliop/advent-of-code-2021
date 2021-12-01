@@ -1,0 +1,19 @@
+{
+  "name": "advent_of_code_2021",
+  "version": "1.0.0",
+  "description": "Solutions to Advent of Code 2021",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/giuliop/advent-of-code-2021.git"
+  },
+  "author": "gws",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/giuliop/advent-of-code-2021/issues"
+  },
+  "homepage": "https://github.com/giuliop/advent-of-code-2021#readme"
+}
