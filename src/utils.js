@@ -15,5 +15,6 @@ export function fileToArray(filename) {
 }
 
 export function arraySum(arr) {
+	if (! arr.length) return 0;
 	return arr.reduce((a, b) => a + b);
 }
