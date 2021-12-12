@@ -5,11 +5,11 @@ const filename = "input/day12";
 const maze = fileToArray(filename)
 	.map(str => str.split('-'))
 	.reduce(function (map, [from, to]) {
-		let fromValue = map.has(from) ? map.get(from) : new Set();
-		let toValue = map.has(to) ? map.get(to) : new Set();
+		let fromValue = map.has(from) ? map.get(from) : [];
+		let toValue = map.has(to) ? map.get(to) : [];
 
-		fromValue.add(to);
-		toValue.add(from);
+		fromValue.push(to);
+		toValue.push(from);
 
 		map.set(from, fromValue);
 		map.set(to, toValue);
@@ -20,56 +20,54 @@ const maze = fileToArray(filename)
 
 let part = 1;
 
-function cloneMap(map) {
-	let m = new Map(map);
-	for (let k of m.keys()) {
-		m.set(k, new Set(m.get(k)));
-	}
-	return m;
-}
-
 class Path {
-	constructor(unexplored, pathSoFar) {
-		this.unexplored = unexplored;
-		this.path = pathSoFar;
+	constructor(maze, from, smallVisited) {
+		this.maze = maze;
+		this.last = from;
+		this.smallVisited = smallVisited;
 		part == 1 ? this.updateStatusPart1() : this.updateStatusPart2();
 	}
 
 	updateStatusPart1() {
-		let last = this.path.at(-1);
-		if (last == last.toLowerCase()
-			&& (this.path.indexOf(last) != (this.path.length - 1))) {
-			this.status = "invalid";
-		} else if (last == "end")
+		this.status = "open"
+
+		if (this.last == "end") {
 				this.status = "ended";
-		else
-			this.status = "open"
+
+		}	else if (this.last == this.last.toLowerCase()) {
+			this.smallVisited.set(this.last,
+				1 + (this.smallVisited.get(this.last) ?? 0));
+
+			if ([...this.smallVisited.values()].filter(x => x > 1).length > 0)
+				this.status = "invalid";
+		}
 	}
 
 	updateStatusPart2() {
-		let last = this.path.at(-1);
-		if ((last == 'start' && this.path.length > 1)
-			||
-			(last == last.toLowerCase()
-				&& (this.path.filter(x => x ==last).length > 2))) {
+		this.status = "open"
+
+		if (this.last == "end")
+			this.status = "ended";
+
+		if (this.last == this.last.toLowerCase()) {
+			this.smallVisited.set(this.last,
+				1 + (this.smallVisited.get(this.last) ?? 0));
+
+			if ((this.smallVisited.get(this.last) > 2) ||
+				([...this.smallVisited.values()].filter(x => x > 1).length > 1))
+				this.status = "invalid";
+		}
+
+		if ((this.smallVisited.get('start') > 1)
+				|| (this.smallVisited.get('end') > 1))
 			this.status = "invalid";
-		} else if (last == "end")
-				this.status = "ended";
-		else
-			this.status = "open"
 	}
 
 	newPathsfrom() {
 		let newPaths = [];
-		let from = this.path.at(-1);
 
-		for (let to of this.unexplored.get(from)) {
-			let unexplored = cloneMap(this.unexplored);
-			let path = this.path.slice()
-
-			unexplored.get(from).delete(to);
-			path.push(to);
-			newPaths.push(new Path(unexplored, path));
+		for (let to of this.maze.get(this.last)) {
+			newPaths.push(new Path(maze, to, new Map(this.smallVisited)));
 		}
 
 		return newPaths;
@@ -77,25 +75,29 @@ class Path {
 }
 
 export function part1() {
-	let pathsEnded = [];
-	let frontier = [new Path(maze, ['start'])];
+	let pathsEnded = 0;
+	let frontier = [new Path(maze, "start", new Map())];
 
 	while (frontier.length) {
 		let next = frontier.pop();
 		for (let path of next.newPathsfrom()) {
-			//console.log(path);
 			if (path.status == 'ended')
-				pathsEnded.push(path);
+				pathsEnded++;
 			if (path.status == 'open') {
 				frontier.push(path);
 			}
 		}
 	}
 
-	return pathsEnded.length;
+	return pathsEnded;
 }
 
 export function part2() {
 	part = 2;
+
+	//let p = part1();
+	//console.log(p.map(x=>x.path));
+	//return p.length;
+
 	return part1();
 }
